@@ -1,0 +1,7 @@
+<template>
+    <div class="field ${classes}" css.bind="styles">
+        <label for.bind="for" if.bind="label&&!labelAfter">${label}</label>
+        <slot></slot>
+        <label for.bind="for" if.bind="label&&labelAfter">${label}</label>
+    </div>
+</template>

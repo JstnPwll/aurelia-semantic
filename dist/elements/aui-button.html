@@ -1,0 +1,7 @@
+<template>
+    <div class="ui button ${classes}" tabindex="0">
+        <aui-icon icon.bind="icon"></aui-icon>
+        <div class="${classes.replace('labeled','')} __aui-button" show.bind="showInnerButton"></div>
+        <slot></slot>
+    </div>
+</template>

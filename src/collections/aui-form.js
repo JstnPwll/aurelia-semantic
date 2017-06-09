@@ -1,56 +1,62 @@
-import { bindable, bindingMode, containerless } from 'aurelia-framework';
-import $ from 'jquery';
+import { inject, bindable, bindingMode, containerless } from 'aurelia-framework';
+import { SemanticElementBase } from '../aui-base';
+import { constants } from '../constants';
+import { bindableEnum, bindableToggle } from '../decorators';
 
 @containerless()
-@inject(Element)
-export class AuiFormCustomElement {
+export class AuiFormCustomElement extends SemanticElementBase {
 
-  @bindable({defaultBindingMode: bindingMode.twoWay}) size;
-  @bindable({defaultBindingMode: bindingMode.twoWay}) state;
-  @bindable equalWidth;
-  @bindable inverted;
+  @bindableEnum(constants.formStates) state;
+  @bindableEnum(constants.sizes) size;
+  @bindableToggle loading = false;
   @bindable behaviors;
-
-  sizes = ['mini', 'tiny', 'small', 'large', 'big', 'huge', 'massive'];
-  states = ['loading', 'success', 'error', 'warning'];
-
-  constructor(element){
-    this.element = element;
-  }
-
-  bind() {
-    this.setSize(this.size || this.element.getAttribute('size'));
-    this.setState(this.state || this.element.getAttribute('state'));
-  }
+  @bindableToggle equalWidth;
+  @bindableToggle inverted;
 
   attached(){
-    if(this.behaviors)
-      $(this.element).form(this.behaviors);
+    this.behaviorsChanged();
+    this.bindingSubscription = this.bindingEngine.propertyObserver(this.semanticElement, 'className')
+      .subscribe((newValue, oldValue) => this.classChanged(newValue, oldValue));
   }
 
-  setSize(size){
-    this.size = sizes.includes(size) ? size : '';
-  }
-
-  setState(state){
-    this.state = states.includes(state) ? state : '';
-  }
-
-  getModifiers(){
-    let modifiers = [];
-    if(this.size)
-      modifiers.push(this.size);
-    if(this.state)
-      modifiers.push(this.state);
-    if(this.equalWidth)
-      modifiers.push('equal width');
-    if(this.inverted)
-      modifiers.push('inverted');
-    return modifiers.join(' ');
+  detached(){
+    this.bindingSubscription && this.bindingSubscription.dispose();
   }
 
   behaviorsChanged(){
-    $(this.element).form(this.behaviors);
+    if(Array.isArray(this.behaviors)){
+      $(this.semanticElement).form(...this.behaviors);
+    }else{
+       $(this.semanticElement).form(this.behaviors);
+    }
+  }
+
+  /**
+   * Triggered when the semanticElement's class changes. This is used to update the two-way bindable `state` property, since the form's state may be changed by the jQuery plugin.
+   * @param  {String} newValue New value of class attribute
+   * @param  {String} oldValue Old value of class attribute
+   */
+  classChanged(newValue, oldValue){
+    let classes = newValue.split(' ');
+    let states = Array.isArray(this.state)?this.state:[this.state];
+    let statesChanged = false;
+    states.slice().reverse().forEach(function(state, index, arry) {
+      if(!classes.includes(state)) {
+        states.splice(arry.length - 1 - index, 1);
+        statesChanged = true;
+      }
+    });
+    classes.forEach(clss => {
+      if(!clss) return;
+      if(constants.formStates.includes(clss) && !states.includes(clss)){
+        states.push(clss);
+        statesChanged = true;
+      }
+    });
+    if(states.length < 2)
+      states = states.join('');
+    if(statesChanged)
+      this.state = states;
   }
 
 }

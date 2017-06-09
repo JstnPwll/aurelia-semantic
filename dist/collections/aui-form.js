@@ -1,7 +1,7 @@
-System.register(['aurelia-framework', 'jquery'], function (_export, _context) {
+System.register(['aurelia-framework', '../aui-base', '../constants', '../decorators'], function (_export, _context) {
   "use strict";
 
-  var bindable, bindingMode, containerless, $, _dec, _dec2, _dec3, _dec4, _class, _desc, _value, _class2, _descriptor, _descriptor2, _descriptor3, _descriptor4, _descriptor5, AuiFormCustomElement;
+  var inject, bindable, bindingMode, containerless, SemanticElementBase, constants, bindableEnum, bindableToggle, _dec, _dec2, _dec3, _class, _desc, _value, _class2, _descriptor, _descriptor2, _descriptor3, _descriptor4, _descriptor5, _descriptor6, AuiFormCustomElement;
 
   function _initDefineProp(target, property, descriptor, context) {
     if (!descriptor) return;
@@ -17,6 +17,30 @@ System.register(['aurelia-framework', 'jquery'], function (_export, _context) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (!self) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return call && (typeof call === "object" || typeof call === "function") ? call : self;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
   }
 
   function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
@@ -54,83 +78,103 @@ System.register(['aurelia-framework', 'jquery'], function (_export, _context) {
 
   return {
     setters: [function (_aureliaFramework) {
+      inject = _aureliaFramework.inject;
       bindable = _aureliaFramework.bindable;
       bindingMode = _aureliaFramework.bindingMode;
       containerless = _aureliaFramework.containerless;
-    }, function (_jquery) {
-      $ = _jquery.default;
+    }, function (_auiBase) {
+      SemanticElementBase = _auiBase.SemanticElementBase;
+    }, function (_constants) {
+      constants = _constants.constants;
+    }, function (_decorators) {
+      bindableEnum = _decorators.bindableEnum;
+      bindableToggle = _decorators.bindableToggle;
     }],
     execute: function () {
-      _export('AuiFormCustomElement', AuiFormCustomElement = (_dec = containerless(), _dec2 = inject(Element), _dec3 = bindable({ defaultBindingMode: bindingMode.twoWay }), _dec4 = bindable({ defaultBindingMode: bindingMode.twoWay }), _dec(_class = _dec2(_class = (_class2 = function () {
-        function AuiFormCustomElement(element) {
+      _export('AuiFormCustomElement', AuiFormCustomElement = (_dec = containerless(), _dec2 = bindableEnum(constants.formStates), _dec3 = bindableEnum(constants.sizes), _dec(_class = (_class2 = function (_SemanticElementBase) {
+        _inherits(AuiFormCustomElement, _SemanticElementBase);
+
+        function AuiFormCustomElement() {
+          var _temp, _this, _ret;
+
           _classCallCheck(this, AuiFormCustomElement);
 
-          _initDefineProp(this, 'size', _descriptor, this);
+          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
 
-          _initDefineProp(this, 'state', _descriptor2, this);
-
-          _initDefineProp(this, 'equalWidth', _descriptor3, this);
-
-          _initDefineProp(this, 'inverted', _descriptor4, this);
-
-          _initDefineProp(this, 'behaviors', _descriptor5, this);
-
-          this.sizes = ['mini', 'tiny', 'small', 'large', 'big', 'huge', 'massive'];
-          this.states = ['loading', 'success', 'error', 'warning'];
-
-          this.element = element;
+          return _ret = (_temp = (_this = _possibleConstructorReturn(this, _SemanticElementBase.call.apply(_SemanticElementBase, [this].concat(args))), _this), _initDefineProp(_this, 'state', _descriptor, _this), _initDefineProp(_this, 'size', _descriptor2, _this), _initDefineProp(_this, 'loading', _descriptor3, _this), _initDefineProp(_this, 'behaviors', _descriptor4, _this), _initDefineProp(_this, 'equalWidth', _descriptor5, _this), _initDefineProp(_this, 'inverted', _descriptor6, _this), _temp), _possibleConstructorReturn(_this, _ret);
         }
 
-        AuiFormCustomElement.prototype.bind = function bind() {
-          this.setSize(this.size || this.element.getAttribute('size'));
-          this.setState(this.state || this.element.getAttribute('state'));
-        };
-
         AuiFormCustomElement.prototype.attached = function attached() {
-          if (this.behaviors) $(this.element).form(this.behaviors);
+          var _this2 = this;
+
+          this.behaviorsChanged();
+          this.bindingSubscription = this.bindingEngine.propertyObserver(this.semanticElement, 'className').subscribe(function (newValue, oldValue) {
+            return _this2.classChanged(newValue, oldValue);
+          });
         };
 
-        AuiFormCustomElement.prototype.setSize = function setSize(size) {
-          this.size = sizes.includes(size) ? size : '';
-        };
-
-        AuiFormCustomElement.prototype.setState = function setState(state) {
-          this.state = states.includes(state) ? state : '';
-        };
-
-        AuiFormCustomElement.prototype.getModifiers = function getModifiers() {
-          var modifiers = [];
-          if (this.size) modifiers.push(this.size);
-          if (this.state) modifiers.push(this.state);
-          if (this.equalWidth) modifiers.push('equal width');
-          if (this.inverted) modifiers.push('inverted');
-          return modifiers.join(' ');
+        AuiFormCustomElement.prototype.detached = function detached() {
+          this.bindingSubscription && this.bindingSubscription.dispose();
         };
 
         AuiFormCustomElement.prototype.behaviorsChanged = function behaviorsChanged() {
-          $(this.element).form(this.behaviors);
+          if (Array.isArray(this.behaviors)) {
+            var _$;
+
+            (_$ = $(this.semanticElement)).form.apply(_$, this.behaviors);
+          } else {
+            $(this.semanticElement).form(this.behaviors);
+          }
+        };
+
+        AuiFormCustomElement.prototype.classChanged = function classChanged(newValue, oldValue) {
+          var classes = newValue.split(' ');
+          var states = Array.isArray(this.state) ? this.state : [this.state];
+          var statesChanged = false;
+          states.slice().reverse().forEach(function (state, index, arry) {
+            if (!classes.includes(state)) {
+              states.splice(arry.length - 1 - index, 1);
+              statesChanged = true;
+            }
+          });
+          classes.forEach(function (clss) {
+            if (!clss) return;
+            if (constants.formStates.includes(clss) && !states.includes(clss)) {
+              states.push(clss);
+              statesChanged = true;
+            }
+          });
+          if (states.length < 2) states = states.join('');
+          if (statesChanged) this.state = states;
         };
 
         return AuiFormCustomElement;
-      }(), (_descriptor = _applyDecoratedDescriptor(_class2.prototype, 'size', [_dec3], {
+      }(SemanticElementBase), (_descriptor = _applyDecoratedDescriptor(_class2.prototype, 'state', [_dec2], {
         enumerable: true,
         initializer: null
-      }), _descriptor2 = _applyDecoratedDescriptor(_class2.prototype, 'state', [_dec4], {
+      }), _descriptor2 = _applyDecoratedDescriptor(_class2.prototype, 'size', [_dec3], {
         enumerable: true,
         initializer: null
-      }), _descriptor3 = _applyDecoratedDescriptor(_class2.prototype, 'equalWidth', [bindable], {
+      }), _descriptor3 = _applyDecoratedDescriptor(_class2.prototype, 'loading', [bindableToggle], {
+        enumerable: true,
+        initializer: function initializer() {
+          return false;
+        }
+      }), _descriptor4 = _applyDecoratedDescriptor(_class2.prototype, 'behaviors', [bindable], {
         enumerable: true,
         initializer: null
-      }), _descriptor4 = _applyDecoratedDescriptor(_class2.prototype, 'inverted', [bindable], {
+      }), _descriptor5 = _applyDecoratedDescriptor(_class2.prototype, 'equalWidth', [bindableToggle], {
         enumerable: true,
         initializer: null
-      }), _descriptor5 = _applyDecoratedDescriptor(_class2.prototype, 'behaviors', [bindable], {
+      }), _descriptor6 = _applyDecoratedDescriptor(_class2.prototype, 'inverted', [bindableToggle], {
         enumerable: true,
         initializer: null
-      })), _class2)) || _class) || _class));
+      })), _class2)) || _class));
 
       _export('AuiFormCustomElement', AuiFormCustomElement);
     }
   };
 });
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9jb2xsZWN0aW9ucy9hdWktZm9ybS5qcyJdLCJuYW1lcyI6WyJiaW5kYWJsZSIsImJpbmRpbmdNb2RlIiwiY29udGFpbmVybGVzcyIsIiQiLCJBdWlGb3JtQ3VzdG9tRWxlbWVudCIsImluamVjdCIsIkVsZW1lbnQiLCJkZWZhdWx0QmluZGluZ01vZGUiLCJ0d29XYXkiLCJlbGVtZW50Iiwic2l6ZXMiLCJzdGF0ZXMiLCJiaW5kIiwic2V0U2l6ZSIsInNpemUiLCJnZXRBdHRyaWJ1dGUiLCJzZXRTdGF0ZSIsInN0YXRlIiwiYXR0YWNoZWQiLCJiZWhhdmlvcnMiLCJmb3JtIiwiaW5jbHVkZXMiLCJnZXRNb2RpZmllcnMiLCJtb2RpZmllcnMiLCJwdXNoIiwiZXF1YWxXaWR0aCIsImludmVydGVkIiwiam9pbiIsImJlaGF2aW9yc0NoYW5nZWQiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQVNBLGMscUJBQUFBLFE7QUFBVUMsaUIscUJBQUFBLFc7QUFBYUMsbUIscUJBQUFBLGE7O0FBQ3pCQyxPOzs7c0NBSU1DLG9CLFdBRlpGLGUsVUFDQUcsT0FBT0MsT0FBUCxDLFVBR0VOLFNBQVMsRUFBQ08sb0JBQW9CTixZQUFZTyxNQUFqQyxFQUFULEMsVUFDQVIsU0FBUyxFQUFDTyxvQkFBb0JOLFlBQVlPLE1BQWpDLEVBQVQsQztBQVFELHNDQUFZQyxPQUFaLEVBQW9CO0FBQUE7O0FBQUE7O0FBQUE7O0FBQUE7O0FBQUE7O0FBQUE7O0FBQUEsZUFIcEJDLEtBR29CLEdBSFosQ0FBQyxNQUFELEVBQVMsTUFBVCxFQUFpQixPQUFqQixFQUEwQixPQUExQixFQUFtQyxLQUFuQyxFQUEwQyxNQUExQyxFQUFrRCxTQUFsRCxDQUdZO0FBQUEsZUFGcEJDLE1BRW9CLEdBRlgsQ0FBQyxTQUFELEVBQVksU0FBWixFQUF1QixPQUF2QixFQUFnQyxTQUFoQyxDQUVXOztBQUNsQixlQUFLRixPQUFMLEdBQWVBLE9BQWY7QUFDRDs7dUNBRURHLEksbUJBQU87QUFDTCxlQUFLQyxPQUFMLENBQWEsS0FBS0MsSUFBTCxJQUFhLEtBQUtMLE9BQUwsQ0FBYU0sWUFBYixDQUEwQixNQUExQixDQUExQjtBQUNBLGVBQUtDLFFBQUwsQ0FBYyxLQUFLQyxLQUFMLElBQWMsS0FBS1IsT0FBTCxDQUFhTSxZQUFiLENBQTBCLE9BQTFCLENBQTVCO0FBQ0QsUzs7dUNBRURHLFEsdUJBQVU7QUFDUixjQUFHLEtBQUtDLFNBQVIsRUFDRWhCLEVBQUUsS0FBS00sT0FBUCxFQUFnQlcsSUFBaEIsQ0FBcUIsS0FBS0QsU0FBMUI7QUFDSCxTOzt1Q0FFRE4sTyxvQkFBUUMsSSxFQUFLO0FBQ1gsZUFBS0EsSUFBTCxHQUFZSixNQUFNVyxRQUFOLENBQWVQLElBQWYsSUFBdUJBLElBQXZCLEdBQThCLEVBQTFDO0FBQ0QsUzs7dUNBRURFLFEscUJBQVNDLEssRUFBTTtBQUNiLGVBQUtBLEtBQUwsR0FBYU4sT0FBT1UsUUFBUCxDQUFnQkosS0FBaEIsSUFBeUJBLEtBQXpCLEdBQWlDLEVBQTlDO0FBQ0QsUzs7dUNBRURLLFksMkJBQWM7QUFDWixjQUFJQyxZQUFZLEVBQWhCO0FBQ0EsY0FBRyxLQUFLVCxJQUFSLEVBQ0VTLFVBQVVDLElBQVYsQ0FBZSxLQUFLVixJQUFwQjtBQUNGLGNBQUcsS0FBS0csS0FBUixFQUNFTSxVQUFVQyxJQUFWLENBQWUsS0FBS1AsS0FBcEI7QUFDRixjQUFHLEtBQUtRLFVBQVIsRUFDRUYsVUFBVUMsSUFBVixDQUFlLGFBQWY7QUFDRixjQUFHLEtBQUtFLFFBQVIsRUFDRUgsVUFBVUMsSUFBVixDQUFlLFVBQWY7QUFDRixpQkFBT0QsVUFBVUksSUFBVixDQUFlLEdBQWYsQ0FBUDtBQUNELFM7O3VDQUVEQyxnQiwrQkFBa0I7QUFDaEJ6QixZQUFFLEtBQUtNLE9BQVAsRUFBZ0JXLElBQWhCLENBQXFCLEtBQUtELFNBQTFCO0FBQ0QsUzs7Ozs7Ozs7O3FGQTVDQW5CLFE7OzttRkFDQUEsUTs7O29GQUNBQSxRIiwiZmlsZSI6ImF1aS1mb3JtLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGJpbmRhYmxlLCBiaW5kaW5nTW9kZSwgY29udGFpbmVybGVzcyB9IGZyb20gJ2F1cmVsaWEtZnJhbWV3b3JrJztcbmltcG9ydCAkIGZyb20gJ2pxdWVyeSc7XG5cbkBjb250YWluZXJsZXNzKClcbkBpbmplY3QoRWxlbWVudClcbmV4cG9ydCBjbGFzcyBBdWlGb3JtQ3VzdG9tRWxlbWVudCB7XG5cbiAgQGJpbmRhYmxlKHtkZWZhdWx0QmluZGluZ01vZGU6IGJpbmRpbmdNb2RlLnR3b1dheX0pIHNpemU7XG4gIEBiaW5kYWJsZSh7ZGVmYXVsdEJpbmRpbmdNb2RlOiBiaW5kaW5nTW9kZS50d29XYXl9KSBzdGF0ZTtcbiAgQGJpbmRhYmxlIGVxdWFsV2lkdGg7XG4gIEBiaW5kYWJsZSBpbnZlcnRlZDtcbiAgQGJpbmRhYmxlIGJlaGF2aW9ycztcblxuICBzaXplcyA9IFsnbWluaScsICd0aW55JywgJ3NtYWxsJywgJ2xhcmdlJywgJ2JpZycsICdodWdlJywgJ21hc3NpdmUnXTtcbiAgc3RhdGVzID0gWydsb2FkaW5nJywgJ3N1Y2Nlc3MnLCAnZXJyb3InLCAnd2FybmluZyddO1xuXG4gIGNvbnN0cnVjdG9yKGVsZW1lbnQpe1xuICAgIHRoaXMuZWxlbWVudCA9IGVsZW1lbnQ7XG4gIH1cblxuICBiaW5kKCkge1xuICAgIHRoaXMuc2V0U2l6ZSh0aGlzLnNpemUgfHwgdGhpcy5lbGVtZW50LmdldEF0dHJpYnV0ZSgnc2l6ZScpKTtcbiAgICB0aGlzLnNldFN0YXRlKHRoaXMuc3RhdGUgfHwgdGhpcy5lbGVtZW50LmdldEF0dHJpYnV0ZSgnc3RhdGUnKSk7XG4gIH1cblxuICBhdHRhY2hlZCgpe1xuICAgIGlmKHRoaXMuYmVoYXZpb3JzKVxuICAgICAgJCh0aGlzLmVsZW1lbnQpLmZvcm0odGhpcy5iZWhhdmlvcnMpO1xuICB9XG5cbiAgc2V0U2l6ZShzaXplKXtcbiAgICB0aGlzLnNpemUgPSBzaXplcy5pbmNsdWRlcyhzaXplKSA/IHNpemUgOiAnJztcbiAgfVxuXG4gIHNldFN0YXRlKHN0YXRlKXtcbiAgICB0aGlzLnN0YXRlID0gc3RhdGVzLmluY2x1ZGVzKHN0YXRlKSA/IHN0YXRlIDogJyc7XG4gIH1cblxuICBnZXRNb2RpZmllcnMoKXtcbiAgICBsZXQgbW9kaWZpZXJzID0gW107XG4gICAgaWYodGhpcy5zaXplKVxuICAgICAgbW9kaWZpZXJzLnB1c2godGhpcy5zaXplKTtcbiAgICBpZih0aGlzLnN0YXRlKVxuICAgICAgbW9kaWZpZXJzLnB1c2godGhpcy5zdGF0ZSk7XG4gICAgaWYodGhpcy5lcXVhbFdpZHRoKVxuICAgICAgbW9kaWZpZXJzLnB1c2goJ2VxdWFsIHdpZHRoJyk7XG4gICAgaWYodGhpcy5pbnZlcnRlZClcbiAgICAgIG1vZGlmaWVycy5wdXNoKCdpbnZlcnRlZCcpO1xuICAgIHJldHVybiBtb2RpZmllcnMuam9pbignICcpO1xuICB9XG5cbiAgYmVoYXZpb3JzQ2hhbmdlZCgpe1xuICAgICQodGhpcy5lbGVtZW50KS5mb3JtKHRoaXMuYmVoYXZpb3JzKTtcbiAgfVxuXG59XG4iXX0=
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9jb2xsZWN0aW9ucy9hdWktZm9ybS5qcyJdLCJuYW1lcyI6WyJpbmplY3QiLCJiaW5kYWJsZSIsImJpbmRpbmdNb2RlIiwiY29udGFpbmVybGVzcyIsIlNlbWFudGljRWxlbWVudEJhc2UiLCJjb25zdGFudHMiLCJiaW5kYWJsZUVudW0iLCJiaW5kYWJsZVRvZ2dsZSIsIkF1aUZvcm1DdXN0b21FbGVtZW50IiwiZm9ybVN0YXRlcyIsInNpemVzIiwiYXR0YWNoZWQiLCJiZWhhdmlvcnNDaGFuZ2VkIiwiYmluZGluZ1N1YnNjcmlwdGlvbiIsImJpbmRpbmdFbmdpbmUiLCJwcm9wZXJ0eU9ic2VydmVyIiwic2VtYW50aWNFbGVtZW50Iiwic3Vic2NyaWJlIiwibmV3VmFsdWUiLCJvbGRWYWx1ZSIsImNsYXNzQ2hhbmdlZCIsImRldGFjaGVkIiwiZGlzcG9zZSIsIkFycmF5IiwiaXNBcnJheSIsImJlaGF2aW9ycyIsImZvcm0iLCIkIiwiY2xhc3NlcyIsInNwbGl0Iiwic3RhdGVzIiwic3RhdGUiLCJzdGF0ZXNDaGFuZ2VkIiwic2xpY2UiLCJyZXZlcnNlIiwiZm9yRWFjaCIsImluZGV4IiwiYXJyeSIsImluY2x1ZGVzIiwic3BsaWNlIiwibGVuZ3RoIiwiY2xzcyIsInB1c2giLCJqb2luIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFTQSxZLHFCQUFBQSxNO0FBQVFDLGMscUJBQUFBLFE7QUFBVUMsaUIscUJBQUFBLFc7QUFBYUMsbUIscUJBQUFBLGE7O0FBQy9CQyx5QixZQUFBQSxtQjs7QUFDQUMsZSxjQUFBQSxTOztBQUNBQyxrQixlQUFBQSxZO0FBQWNDLG9CLGVBQUFBLGM7OztzQ0FHVkMsb0IsV0FEWkwsZSxVQUdFRyxhQUFhRCxVQUFVSSxVQUF2QixDLFVBQ0FILGFBQWFELFVBQVVLLEtBQXZCLEM7Ozs7Ozs7Ozs7Ozs7Ozt1Q0FNREMsUSx1QkFBVTtBQUFBOztBQUNSLGVBQUtDLGdCQUFMO0FBQ0EsZUFBS0MsbUJBQUwsR0FBMkIsS0FBS0MsYUFBTCxDQUFtQkMsZ0JBQW5CLENBQW9DLEtBQUtDLGVBQXpDLEVBQTBELFdBQTFELEVBQ3hCQyxTQUR3QixDQUNkLFVBQUNDLFFBQUQsRUFBV0MsUUFBWDtBQUFBLG1CQUF3QixPQUFLQyxZQUFMLENBQWtCRixRQUFsQixFQUE0QkMsUUFBNUIsQ0FBeEI7QUFBQSxXQURjLENBQTNCO0FBRUQsUzs7dUNBRURFLFEsdUJBQVU7QUFDUixlQUFLUixtQkFBTCxJQUE0QixLQUFLQSxtQkFBTCxDQUF5QlMsT0FBekIsRUFBNUI7QUFDRCxTOzt1Q0FFRFYsZ0IsK0JBQWtCO0FBQ2hCLGNBQUdXLE1BQU1DLE9BQU4sQ0FBYyxLQUFLQyxTQUFuQixDQUFILEVBQWlDO0FBQUE7O0FBQy9CLG9CQUFFLEtBQUtULGVBQVAsR0FBd0JVLElBQXhCLFdBQWdDLEtBQUtELFNBQXJDO0FBQ0QsV0FGRCxNQUVLO0FBQ0ZFLGNBQUUsS0FBS1gsZUFBUCxFQUF3QlUsSUFBeEIsQ0FBNkIsS0FBS0QsU0FBbEM7QUFDRjtBQUNGLFM7O3VDQU9ETCxZLHlCQUFhRixRLEVBQVVDLFEsRUFBUztBQUM5QixjQUFJUyxVQUFVVixTQUFTVyxLQUFULENBQWUsR0FBZixDQUFkO0FBQ0EsY0FBSUMsU0FBU1AsTUFBTUMsT0FBTixDQUFjLEtBQUtPLEtBQW5CLElBQTBCLEtBQUtBLEtBQS9CLEdBQXFDLENBQUMsS0FBS0EsS0FBTixDQUFsRDtBQUNBLGNBQUlDLGdCQUFnQixLQUFwQjtBQUNBRixpQkFBT0csS0FBUCxHQUFlQyxPQUFmLEdBQXlCQyxPQUF6QixDQUFpQyxVQUFTSixLQUFULEVBQWdCSyxLQUFoQixFQUF1QkMsSUFBdkIsRUFBNkI7QUFDNUQsZ0JBQUcsQ0FBQ1QsUUFBUVUsUUFBUixDQUFpQlAsS0FBakIsQ0FBSixFQUE2QjtBQUMzQkQscUJBQU9TLE1BQVAsQ0FBY0YsS0FBS0csTUFBTCxHQUFjLENBQWQsR0FBa0JKLEtBQWhDLEVBQXVDLENBQXZDO0FBQ0FKLDhCQUFnQixJQUFoQjtBQUNEO0FBQ0YsV0FMRDtBQU1BSixrQkFBUU8sT0FBUixDQUFnQixnQkFBUTtBQUN0QixnQkFBRyxDQUFDTSxJQUFKLEVBQVU7QUFDVixnQkFBR3BDLFVBQVVJLFVBQVYsQ0FBcUI2QixRQUFyQixDQUE4QkcsSUFBOUIsS0FBdUMsQ0FBQ1gsT0FBT1EsUUFBUCxDQUFnQkcsSUFBaEIsQ0FBM0MsRUFBaUU7QUFDL0RYLHFCQUFPWSxJQUFQLENBQVlELElBQVo7QUFDQVQsOEJBQWdCLElBQWhCO0FBQ0Q7QUFDRixXQU5EO0FBT0EsY0FBR0YsT0FBT1UsTUFBUCxHQUFnQixDQUFuQixFQUNFVixTQUFTQSxPQUFPYSxJQUFQLENBQVksRUFBWixDQUFUO0FBQ0YsY0FBR1gsYUFBSCxFQUNFLEtBQUtELEtBQUwsR0FBYUQsTUFBYjtBQUNILFM7OztRQXJEdUMxQixtQjs7Ozs7O2tGQUl2Q0csYzs7O2lCQUF5QixLOztvRkFDekJOLFE7OztxRkFDQU0sYzs7O21GQUNBQSxjIiwiZmlsZSI6ImF1aS1mb3JtLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGluamVjdCwgYmluZGFibGUsIGJpbmRpbmdNb2RlLCBjb250YWluZXJsZXNzIH0gZnJvbSAnYXVyZWxpYS1mcmFtZXdvcmsnO1xuaW1wb3J0IHsgU2VtYW50aWNFbGVtZW50QmFzZSB9IGZyb20gJy4uL2F1aS1iYXNlJztcbmltcG9ydCB7IGNvbnN0YW50cyB9IGZyb20gJy4uL2NvbnN0YW50cyc7XG5pbXBvcnQgeyBiaW5kYWJsZUVudW0sIGJpbmRhYmxlVG9nZ2xlIH0gZnJvbSAnLi4vZGVjb3JhdG9ycyc7XG5cbkBjb250YWluZXJsZXNzKClcbmV4cG9ydCBjbGFzcyBBdWlGb3JtQ3VzdG9tRWxlbWVudCBleHRlbmRzIFNlbWFudGljRWxlbWVudEJhc2Uge1xuXG4gIEBiaW5kYWJsZUVudW0oY29uc3RhbnRzLmZvcm1TdGF0ZXMpIHN0YXRlO1xuICBAYmluZGFibGVFbnVtKGNvbnN0YW50cy5zaXplcykgc2l6ZTtcbiAgQGJpbmRhYmxlVG9nZ2xlIGxvYWRpbmcgPSBmYWxzZTtcbiAgQGJpbmRhYmxlIGJlaGF2aW9ycztcbiAgQGJpbmRhYmxlVG9nZ2xlIGVxdWFsV2lkdGg7XG4gIEBiaW5kYWJsZVRvZ2dsZSBpbnZlcnRlZDtcblxuICBhdHRhY2hlZCgpe1xuICAgIHRoaXMuYmVoYXZpb3JzQ2hhbmdlZCgpO1xuICAgIHRoaXMuYmluZGluZ1N1YnNjcmlwdGlvbiA9IHRoaXMuYmluZGluZ0VuZ2luZS5wcm9wZXJ0eU9ic2VydmVyKHRoaXMuc2VtYW50aWNFbGVtZW50LCAnY2xhc3NOYW1lJylcbiAgICAgIC5zdWJzY3JpYmUoKG5ld1ZhbHVlLCBvbGRWYWx1ZSkgPT4gdGhpcy5jbGFzc0NoYW5nZWQobmV3VmFsdWUsIG9sZFZhbHVlKSk7XG4gIH1cblxuICBkZXRhY2hlZCgpe1xuICAgIHRoaXMuYmluZGluZ1N1YnNjcmlwdGlvbiAmJiB0aGlzLmJpbmRpbmdTdWJzY3JpcHRpb24uZGlzcG9zZSgpO1xuICB9XG5cbiAgYmVoYXZpb3JzQ2hhbmdlZCgpe1xuICAgIGlmKEFycmF5LmlzQXJyYXkodGhpcy5iZWhhdmlvcnMpKXtcbiAgICAgICQodGhpcy5zZW1hbnRpY0VsZW1lbnQpLmZvcm0oLi4udGhpcy5iZWhhdmlvcnMpO1xuICAgIH1lbHNle1xuICAgICAgICQodGhpcy5zZW1hbnRpY0VsZW1lbnQpLmZvcm0odGhpcy5iZWhhdmlvcnMpO1xuICAgIH1cbiAgfVxuXG4gIC8qKlxuICAgKiBUcmlnZ2VyZWQgd2hlbiB0aGUgc2VtYW50aWNFbGVtZW50J3MgY2xhc3MgY2hhbmdlcy4gVGhpcyBpcyB1c2VkIHRvIHVwZGF0ZSB0aGUgdHdvLXdheSBiaW5kYWJsZSBgc3RhdGVgIHByb3BlcnR5LCBzaW5jZSB0aGUgZm9ybSdzIHN0YXRlIG1heSBiZSBjaGFuZ2VkIGJ5IHRoZSBqUXVlcnkgcGx1Z2luLlxuICAgKiBAcGFyYW0gIHtTdHJpbmd9IG5ld1ZhbHVlIE5ldyB2YWx1ZSBvZiBjbGFzcyBhdHRyaWJ1dGVcbiAgICogQHBhcmFtICB7U3RyaW5nfSBvbGRWYWx1ZSBPbGQgdmFsdWUgb2YgY2xhc3MgYXR0cmlidXRlXG4gICAqL1xuICBjbGFzc0NoYW5nZWQobmV3VmFsdWUsIG9sZFZhbHVlKXtcbiAgICBsZXQgY2xhc3NlcyA9IG5ld1ZhbHVlLnNwbGl0KCcgJyk7XG4gICAgbGV0IHN0YXRlcyA9IEFycmF5LmlzQXJyYXkodGhpcy5zdGF0ZSk/dGhpcy5zdGF0ZTpbdGhpcy5zdGF0ZV07XG4gICAgbGV0IHN0YXRlc0NoYW5nZWQgPSBmYWxzZTtcbiAgICBzdGF0ZXMuc2xpY2UoKS5yZXZlcnNlKCkuZm9yRWFjaChmdW5jdGlvbihzdGF0ZSwgaW5kZXgsIGFycnkpIHtcbiAgICAgIGlmKCFjbGFzc2VzLmluY2x1ZGVzKHN0YXRlKSkge1xuICAgICAgICBzdGF0ZXMuc3BsaWNlKGFycnkubGVuZ3RoIC0gMSAtIGluZGV4LCAxKTtcbiAgICAgICAgc3RhdGVzQ2hhbmdlZCA9IHRydWU7XG4gICAgICB9XG4gICAgfSk7XG4gICAgY2xhc3Nlcy5mb3JFYWNoKGNsc3MgPT4ge1xuICAgICAgaWYoIWNsc3MpIHJldHVybjtcbiAgICAgIGlmKGNvbnN0YW50cy5mb3JtU3RhdGVzLmluY2x1ZGVzKGNsc3MpICYmICFzdGF0ZXMuaW5jbHVkZXMoY2xzcykpe1xuICAgICAgICBzdGF0ZXMucHVzaChjbHNzKTtcbiAgICAgICAgc3RhdGVzQ2hhbmdlZCA9IHRydWU7XG4gICAgICB9XG4gICAgfSk7XG4gICAgaWYoc3RhdGVzLmxlbmd0aCA8IDIpXG4gICAgICBzdGF0ZXMgPSBzdGF0ZXMuam9pbignJyk7XG4gICAgaWYoc3RhdGVzQ2hhbmdlZClcbiAgICAgIHRoaXMuc3RhdGUgPSBzdGF0ZXM7XG4gIH1cblxufVxuIl19
